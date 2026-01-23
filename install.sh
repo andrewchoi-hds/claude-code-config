@@ -20,17 +20,21 @@ REPO_RAW="https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/ma
 TEMP_DIR=$(mktemp -d)
 
 # Agent definitions
-BASE_AGENTS=("explorer" "tester" "e2e-tester" "reviewer" "documenter")
-DOMAIN_AGENTS=("frontend" "backend" "mobile" "devops" "data-ml" "design" "pm" "evil-user" "bm-master" "product-planner")
+BASE_AGENTS="explorer tester e2e-tester reviewer documenter"
+DOMAIN_AGENTS="frontend backend mobile devops data-ml design pm evil-user bm-master product-planner"
 
-# Preset definitions
-declare -A PRESETS
-PRESETS[full]="all"
-PRESETS[minimal]="base"
-PRESETS[frontend]="frontend,design,mobile"
-PRESETS[backend]="backend,devops,data-ml"
-PRESETS[planner]="pm,bm-master,product-planner"
-PRESETS[qa]="evil-user"
+# Preset definitions (function to avoid bash 4.0 requirement)
+get_preset() {
+    case "$1" in
+        full) echo "all" ;;
+        minimal) echo "base" ;;
+        frontend) echo "frontend,design,mobile" ;;
+        backend) echo "backend,devops,data-ml" ;;
+        planner) echo "pm,bm-master,product-planner" ;;
+        qa) echo "evil-user" ;;
+        *) echo "$1" ;;
+    esac
+}
 
 # Cleanup on exit
 cleanup() {
@@ -192,7 +196,7 @@ install_config() {
     print_success "커맨드 설치됨 (10개)"
 
     # Copy base agents
-    for agent in "${BASE_AGENTS[@]}"; do
+    for agent in $BASE_AGENTS; do
         if [ -f "$source_dir/agents/base/${agent}.md" ]; then
             cp "$source_dir/agents/base/${agent}.md" "$dest_dir/agents/base/"
         fi
@@ -200,25 +204,25 @@ install_config() {
     print_success "기본 에이전트 설치됨 (5개)"
 
     # Determine which domain agents to install
-    local domains_to_install=()
+    local domains_to_install=""
 
     if [ "$preset" = "all" ]; then
-        domains_to_install=("${DOMAIN_AGENTS[@]}")
+        domains_to_install="$DOMAIN_AGENTS"
     elif [ "$preset" = "base" ]; then
         # No domain agents for minimal
-        domains_to_install=()
+        domains_to_install=""
     else
-        # Parse comma-separated list
-        IFS=',' read -ra domains_to_install <<< "$preset"
+        # Convert comma to space
+        domains_to_install=$(echo "$preset" | tr ',' ' ')
     fi
 
     # Copy selected domain agents
     local domain_count=0
-    for agent in "${domains_to_install[@]}"; do
+    for agent in $domains_to_install; do
         agent=$(echo "$agent" | xargs) # trim whitespace
         if [ -f "$source_dir/agents/domain/${agent}.md" ]; then
             cp "$source_dir/agents/domain/${agent}.md" "$dest_dir/agents/domain/"
-            ((domain_count++))
+            domain_count=$((domain_count + 1))
         fi
     done
 
@@ -414,10 +418,10 @@ main() {
         case $preset_choice in
             1) preset="all" ;;
             2) preset="base" ;;
-            3) preset="${PRESETS[frontend]}" ;;
-            4) preset="${PRESETS[backend]}" ;;
-            5) preset="${PRESETS[planner]}" ;;
-            6) preset="${PRESETS[qa]}" ;;
+            3) preset=$(get_preset "frontend") ;;
+            4) preset=$(get_preset "backend") ;;
+            5) preset=$(get_preset "planner") ;;
+            6) preset=$(get_preset "qa") ;;
             7) preset=$(select_custom_agents) ;;
             *) print_error "잘못된 선택입니다."; exit 1 ;;
         esac
@@ -427,10 +431,7 @@ main() {
         case $preset in
             full) preset="all" ;;
             minimal) preset="base" ;;
-            frontend) preset="${PRESETS[frontend]}" ;;
-            backend) preset="${PRESETS[backend]}" ;;
-            planner) preset="${PRESETS[planner]}" ;;
-            qa) preset="${PRESETS[qa]}" ;;
+            frontend|backend|planner|qa) preset=$(get_preset "$preset") ;;
             custom) preset=$(select_custom_agents) ;;
         esac
     fi
