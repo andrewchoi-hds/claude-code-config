@@ -1,5 +1,7 @@
 # Claude Code Custom Agents & Commands
 
+[![GitHub](https://img.shields.io/badge/GitHub-andrewchoi--hds%2Fclaude--code--config-blue?logo=github)](https://github.com/andrewchoi-hds/claude-code-config)
+
 Claude Code를 위한 커스텀 에이전트 및 슬래시 커맨드 모음입니다.
 
 ## 설치 방법
@@ -7,18 +9,33 @@ Claude Code를 위한 커스텀 에이전트 및 슬래시 커맨드 모음입�
 ### 글로벌 설치 (모든 프로젝트에 적용)
 
 ```bash
-# 압축 해제 후 홈 디렉토리로 복사
-cp -r .claude ~/
+# 저장소 클론
+git clone https://github.com/andrewchoi-hds/claude-code-config.git
+
+# 홈 디렉토리로 복사
+cp -r claude-code-config/.claude ~/
 
 # 또는 기존 .claude가 있다면 내용만 병합
-cp -r .claude/* ~/.claude/
+cp -r claude-code-config/.claude/* ~/.claude/
+
+# 클론한 디렉토리 정리 (선택)
+rm -rf claude-code-config
 ```
 
 ### 프로젝트별 설치
 
 ```bash
-# 특정 프로젝트에만 적용
-cp -r .claude /path/to/your/project/
+# 저장소 클론 후 특정 프로젝트에만 적용
+git clone https://github.com/andrewchoi-hds/claude-code-config.git
+cp -r claude-code-config/.claude /path/to/your/project/
+rm -rf claude-code-config
+```
+
+### 원라이너 설치
+
+```bash
+# 글로벌 설치 (한 줄)
+git clone https://github.com/andrewchoi-hds/claude-code-config.git && cp -r claude-code-config/.claude ~/ && rm -rf claude-code-config
 ```
 
 ## 사용 가능한 커맨드
@@ -80,6 +97,7 @@ cp -r .claude /path/to/your/project/
 │   ├── base/              # 기본 에이전트
 │   │   ├── explorer.md
 │   │   ├── tester.md
+│   │   ├── e2e-tester.md
 │   │   ├── reviewer.md
 │   │   └── documenter.md
 │   └── domain/            # 도메인 에이전트
