@@ -89,6 +89,7 @@ rm -rf claude-code-config
 | **PM** | 이슈 관리, 릴리스, 스프린트 |
 | **Evil User** | 엣지케이스 발굴, 이탈 시나리오, QA 악질 유저 시뮬레이션 |
 | **BM Master** | 비즈니스 모델, 수익화 전략, KPI/지표 분석 |
+| **Product Planner** | PRD 작성/분석, 요구사항 정의, 유저 스토리 |
 
 ## 폴더 구조
 
@@ -122,7 +123,8 @@ rm -rf claude-code-config
 │       ├── design.md
 │       ├── pm.md
 │       ├── evil-user.md
-│       └── bm-master.md
+│       ├── bm-master.md
+│       └── product-planner.md
 └── state/                 # 상태 저장
     ├── todos.json
     └── session-context.json
