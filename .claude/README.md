@@ -13,29 +13,71 @@ Claude Code를 위한 커스텀 에이전트 및 슬래시 커맨드 모음입�
 curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash
 ```
 
-### 프리셋 설치
+### 프리셋별 원라이너 설치
 
-역할에 맞는 에이전트 조합을 선택할 수 있습니다:
+역할에 맞는 명령어를 복사해서 사용하세요:
 
-| 프리셋 | 설명 | 포함 에이전트 |
-|--------|------|--------------|
-| `full` | 전체 설치 | Base(5) + Domain(10) |
-| `minimal` | 최소 설치 | Base(5)만 |
-| `frontend` | 프론트엔드 개발자 | Base + Frontend, Design, Mobile |
-| `backend` | 백엔드 개발자 | Base + Backend, DevOps, Data/ML |
-| `planner` | 기획자/PM | Base + PM, BM Master, Product Planner |
-| `qa` | QA 엔지니어 | Base + Evil User |
-| `custom` | 직접 선택 | 개별 에이전트 선택 |
+#### 1. Full (전체) - 모든 에이전트
+> Base(5) + Domain(10) = 15개 에이전트
 
 ```bash
-# 프리셋으로 글로벌 설치
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -g -p full
+```
+
+#### 2. Minimal (최소) - 기본만
+> Base(5) 에이전트만
+
+```bash
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -g -p minimal
+```
+
+#### 3. Frontend (프론트엔드 개발자)
+> Base + Frontend, Design, Mobile
+
+```bash
 curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -g -p frontend
+```
 
-# 프리셋으로 프로젝트 설치
-curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -l -p backend
+#### 4. Backend (백엔드 개발자)
+> Base + Backend, DevOps, Data/ML
 
-# 직접 선택 모드
-curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -p custom
+```bash
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -g -p backend
+```
+
+#### 5. Planner (기획자/PM)
+> Base + PM, BM Master, Product Planner
+
+```bash
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -g -p planner
+```
+
+#### 6. QA (품질관리)
+> Base + Evil User
+
+```bash
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -g -p qa
+```
+
+#### 프리셋 요약
+
+| # | 프리셋 | 대상 | 포함 에이전트 |
+|---|--------|------|--------------|
+| 1 | `full` | 전체 | Base(5) + Domain(10) |
+| 2 | `minimal` | 최소 | Base(5)만 |
+| 3 | `frontend` | 프론트엔드 | Base + Frontend, Design, Mobile |
+| 4 | `backend` | 백엔드 | Base + Backend, DevOps, Data/ML |
+| 5 | `planner` | 기획자 | Base + PM, BM Master, Product Planner |
+| 6 | `qa` | QA | Base + Evil User |
+
+> **참고**: `-g`를 `-l`로 바꾸면 현재 디렉토리에 프로젝트별 설치됩니다.
+
+### 직접 선택 설치
+
+원하는 에이전트만 골라서 설치:
+
+```bash
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -g -p custom
 ```
 
 ### 기타 옵션
