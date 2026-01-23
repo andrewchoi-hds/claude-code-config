@@ -87,6 +87,8 @@ rm -rf claude-code-config
 | **Data/ML** | Pandas, PyTorch, MLOps |
 | **Design** | 디자인 시스템, Storybook, WCAG |
 | **PM** | 이슈 관리, 릴리스, 스프린트 |
+| **Evil User** | 엣지케이스 발굴, 이탈 시나리오, QA 악질 유저 시뮬레이션 |
+| **BM Master** | 비즈니스 모델, 수익화 전략, KPI/지표 분석 |
 
 ## 폴더 구조
 
@@ -118,7 +120,9 @@ rm -rf claude-code-config
 │       ├── devops.md
 │       ├── data-ml.md
 │       ├── design.md
-│       └── pm.md
+│       ├── pm.md
+│       ├── evil-user.md
+│       └── bm-master.md
 └── state/                 # 상태 저장
     ├── todos.json
     └── session-context.json
