@@ -1,0 +1,12 @@
+# System files
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Local settings (contains personal permissions)
+.claude/settings.local.json
+
+# State files (session-specific)
+.claude/state/session-context.json
+.claude/state/todos.json
