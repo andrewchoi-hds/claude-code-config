@@ -10,12 +10,27 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
 NC='\033[0m' # No Color
 
 # Config
 REPO_URL="https://github.com/andrewchoi-hds/claude-code-config"
 REPO_RAW="https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main"
 TEMP_DIR=$(mktemp -d)
+
+# Agent definitions
+BASE_AGENTS=("explorer" "tester" "e2e-tester" "reviewer" "documenter")
+DOMAIN_AGENTS=("frontend" "backend" "mobile" "devops" "data-ml" "design" "pm" "evil-user" "bm-master" "product-planner")
+
+# Preset definitions
+declare -A PRESETS
+PRESETS[full]="all"
+PRESETS[minimal]="base"
+PRESETS[frontend]="frontend,design,mobile"
+PRESETS[backend]="backend,devops,data-ml"
+PRESETS[planner]="pm,bm-master,product-planner"
+PRESETS[qa]="evil-user"
 
 # Cleanup on exit
 cleanup() {
@@ -26,9 +41,9 @@ trap cleanup EXIT
 # Print functions
 print_header() {
     echo ""
-    echo -e "${BLUE}╔════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║  ${GREEN}Claude Code Config Installer${BLUE}              ║${NC}"
-    echo -e "${BLUE}╚════════════════════════════════════════════╝${NC}"
+    echo -e "${BLUE}╔════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${BLUE}║  ${GREEN}${BOLD}Claude Code Config Installer${NC}${BLUE}                        ║${NC}"
+    echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}"
     echo ""
 }
 
@@ -46,6 +61,17 @@ print_error() {
 
 print_info() {
     echo -e "${BLUE}ℹ${NC} $1"
+}
+
+print_preset() {
+    local num=$1
+    local name=$2
+    local desc=$3
+    local agents=$4
+    echo -e "  ${CYAN}${num})${NC} ${BOLD}${name}${NC}"
+    echo -e "     ${desc}"
+    echo -e "     ${YELLOW}→${NC} ${agents}"
+    echo ""
 }
 
 # Check dependencies
@@ -86,32 +112,137 @@ backup_config() {
     fi
 }
 
-# Install to target
-install_config() {
-    local target_dir=$1
-    local source_dir="$TEMP_DIR/repo/.claude"
-
-    cp -r "$source_dir" "$target_dir/"
-
-    # Remove state files (they should be generated fresh)
-    rm -f "$target_dir/.claude/state/session-context.json" 2>/dev/null || true
-    rm -f "$target_dir/.claude/state/todos.json" 2>/dev/null || true
-    rm -f "$target_dir/.claude/settings.local.json" 2>/dev/null || true
-
-    # Create empty state files
-    mkdir -p "$target_dir/.claude/state"
-    echo '{"version":"1.0","lastUpdated":null,"project":null,"stack":null,"domains":null,"commands":null,"structure":null}' > "$target_dir/.claude/state/session-context.json"
-    echo '{"version":"1.0","projects":{}}' > "$target_dir/.claude/state/todos.json"
-
-    print_success "설치 완료: $target_dir/.claude"
+# Show preset menu
+show_preset_menu() {
+    echo -e "${BOLD}설치 프리셋을 선택하세요:${NC}"
+    echo ""
+    print_preset "1" "Full (전체)" "모든 에이전트와 커맨드 설치" "Base(5) + Domain(10) + Commands(10)"
+    print_preset "2" "Minimal (최소)" "기본 에이전트와 커맨드만" "Base(5) + Commands(10)"
+    print_preset "3" "Frontend (프론트엔드)" "웹/앱 프론트엔드 개발자용" "Base + Frontend, Design, Mobile"
+    print_preset "4" "Backend (백엔드)" "서버/인프라 개발자용" "Base + Backend, DevOps, Data/ML"
+    print_preset "5" "Planner (기획자)" "PM/기획자용" "Base + PM, BM Master, Product Planner"
+    print_preset "6" "QA (품질관리)" "QA 엔지니어용" "Base + Evil User, E2E Tester"
+    print_preset "7" "Custom (직접 선택)" "원하는 에이전트 직접 선택" "개별 선택"
+    echo ""
 }
 
-# Show installed content
-show_summary() {
+# Custom agent selection
+select_custom_agents() {
+    local selected_domains=()
+
+    echo -e "${BOLD}도메인 에이전트를 선택하세요 (스페이스로 구분, 예: 1 3 5):${NC}"
     echo ""
-    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${GREEN}설치 완료!${NC}"
-    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo "  1) frontend      - React, Vue, 웹 프론트엔드"
+    echo "  2) backend       - API, DB, 서버 개발"
+    echo "  3) mobile        - React Native, Flutter"
+    echo "  4) devops        - Docker, K8s, CI/CD"
+    echo "  5) data-ml       - 데이터 분석, ML"
+    echo "  6) design        - 디자인 시스템, 접근성"
+    echo "  7) pm            - 이슈 관리, 스프린트"
+    echo "  8) evil-user     - QA 악질 유저 시뮬레이션"
+    echo "  9) bm-master     - 비즈니스 모델, 수익화"
+    echo "  10) product-planner - PRD 작성, 요구사항"
+    echo ""
+    echo "  0) 선택 완료"
+    echo ""
+
+    read -p "선택 (예: 1 2 8): " choices
+
+    for choice in $choices; do
+        case $choice in
+            1) selected_domains+=("frontend") ;;
+            2) selected_domains+=("backend") ;;
+            3) selected_domains+=("mobile") ;;
+            4) selected_domains+=("devops") ;;
+            5) selected_domains+=("data-ml") ;;
+            6) selected_domains+=("design") ;;
+            7) selected_domains+=("pm") ;;
+            8) selected_domains+=("evil-user") ;;
+            9) selected_domains+=("bm-master") ;;
+            10) selected_domains+=("product-planner") ;;
+        esac
+    done
+
+    if [ ${#selected_domains[@]} -eq 0 ]; then
+        echo "base"
+    else
+        echo "$(IFS=,; echo "${selected_domains[*]}")"
+    fi
+}
+
+# Install selected components
+install_config() {
+    local target_dir=$1
+    local preset=$2
+    local source_dir="$TEMP_DIR/repo/.claude"
+    local dest_dir="$target_dir/.claude"
+
+    # Create directory structure
+    mkdir -p "$dest_dir/commands"
+    mkdir -p "$dest_dir/agents/base"
+    mkdir -p "$dest_dir/agents/domain"
+    mkdir -p "$dest_dir/state"
+
+    # Always copy base files
+    cp "$source_dir/CLAUDE.md" "$dest_dir/"
+    cp "$source_dir/README.md" "$dest_dir/"
+
+    # Copy all commands
+    cp "$source_dir/commands/"*.md "$dest_dir/commands/"
+    print_success "커맨드 설치됨 (10개)"
+
+    # Copy base agents
+    for agent in "${BASE_AGENTS[@]}"; do
+        if [ -f "$source_dir/agents/base/${agent}.md" ]; then
+            cp "$source_dir/agents/base/${agent}.md" "$dest_dir/agents/base/"
+        fi
+    done
+    print_success "기본 에이전트 설치됨 (5개)"
+
+    # Determine which domain agents to install
+    local domains_to_install=()
+
+    if [ "$preset" = "all" ]; then
+        domains_to_install=("${DOMAIN_AGENTS[@]}")
+    elif [ "$preset" = "base" ]; then
+        # No domain agents for minimal
+        domains_to_install=()
+    else
+        # Parse comma-separated list
+        IFS=',' read -ra domains_to_install <<< "$preset"
+    fi
+
+    # Copy selected domain agents
+    local domain_count=0
+    for agent in "${domains_to_install[@]}"; do
+        agent=$(echo "$agent" | xargs) # trim whitespace
+        if [ -f "$source_dir/agents/domain/${agent}.md" ]; then
+            cp "$source_dir/agents/domain/${agent}.md" "$dest_dir/agents/domain/"
+            ((domain_count++))
+        fi
+    done
+
+    if [ $domain_count -gt 0 ]; then
+        print_success "도메인 에이전트 설치됨 (${domain_count}개): ${domains_to_install[*]}"
+    fi
+
+    # Create empty state files
+    echo '{"version":"1.0","lastUpdated":null,"project":null,"stack":null,"domains":null,"commands":null,"structure":null}' > "$dest_dir/state/session-context.json"
+    echo '{"version":"1.0","projects":{}}' > "$dest_dir/state/todos.json"
+
+    print_success "설치 완료: $dest_dir"
+}
+
+# Show installed content summary
+show_summary() {
+    local preset=$1
+
+    echo ""
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${GREEN}${BOLD}설치 완료!${NC}"
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "${BOLD}설치된 프리셋:${NC} $preset"
     echo ""
     echo "포함된 내용:"
     echo "  • 슬래시 커맨드 10개"
@@ -121,10 +252,91 @@ show_summary() {
     echo "  • 기본 에이전트 5개"
     echo "    Explorer, Tester, E2E Tester, Reviewer, Documenter"
     echo ""
-    echo "  • 도메인 에이전트 7개"
-    echo "    Frontend, Backend, Mobile, DevOps, Data/ML, Design, PM"
-    echo ""
+
+    if [ "$preset" != "base" ]; then
+        echo "  • 도메인 에이전트"
+        case $preset in
+            all)
+                echo "    Frontend, Backend, Mobile, DevOps, Data/ML"
+                echo "    Design, PM, Evil User, BM Master, Product Planner"
+                ;;
+            *)
+                echo "    $preset"
+                ;;
+        esac
+        echo ""
+    fi
+
     echo -e "사용법: Claude Code에서 ${YELLOW}/init${NC} 실행하여 시작"
+    echo ""
+    echo -e "${CYAN}추가 에이전트가 필요하면:${NC}"
+    echo "  curl -sL $REPO_RAW/install.sh | bash -s -- --preset custom"
+    echo ""
+}
+
+# Show help
+show_help() {
+    echo "사용법: install.sh [옵션]"
+    echo ""
+    echo "설치 위치:"
+    echo "  -g, --global        홈 디렉토리에 글로벌 설치 (~/.claude)"
+    echo "  -l, --local         현재 디렉토리에 프로젝트별 설치"
+    echo "  -d, --dir PATH      지정한 경로에 설치"
+    echo ""
+    echo "프리셋:"
+    echo "  -p, --preset NAME   프리셋 선택"
+    echo "      full            전체 설치 (기본값)"
+    echo "      minimal         기본 에이전트만"
+    echo "      frontend        프론트엔드 개발자용"
+    echo "      backend         백엔드 개발자용"
+    echo "      planner         기획자/PM용"
+    echo "      qa              QA 엔지니어용"
+    echo "      custom          직접 선택"
+    echo ""
+    echo "기타:"
+    echo "  -h, --help          이 도움말 표시"
+    echo "  --list              사용 가능한 에이전트 목록"
+    echo ""
+    echo "예시:"
+    echo "  # 대화형 설치"
+    echo "  curl -sL $REPO_RAW/install.sh | bash"
+    echo ""
+    echo "  # 프론트엔드 프리셋으로 글로벌 설치"
+    echo "  curl -sL $REPO_RAW/install.sh | bash -s -- -g -p frontend"
+    echo ""
+    echo "  # 백엔드 프리셋으로 특정 프로젝트에 설치"
+    echo "  curl -sL $REPO_RAW/install.sh | bash -s -- -d /my/project -p backend"
+}
+
+# List agents
+list_agents() {
+    echo ""
+    echo -e "${BOLD}Base Agents (기본 에이전트)${NC}"
+    echo "  explorer      - 코드베이스 탐색, 구조 분석"
+    echo "  tester        - 테스트 실행/생성, TDD"
+    echo "  e2e-tester    - E2E 테스트, 브라우저 자동화"
+    echo "  reviewer      - 코드 리뷰, 품질 평가"
+    echo "  documenter    - 문서화, API 문서"
+    echo ""
+    echo -e "${BOLD}Domain Agents (도메인 에이전트)${NC}"
+    echo "  frontend      - React, Vue, 웹 프론트엔드"
+    echo "  backend       - API, DB, 서버 개발"
+    echo "  mobile        - React Native, Flutter"
+    echo "  devops        - Docker, K8s, CI/CD"
+    echo "  data-ml       - 데이터 분석, ML"
+    echo "  design        - 디자인 시스템, 접근성"
+    echo "  pm            - 이슈 관리, 스프린트"
+    echo "  evil-user     - QA 악질 유저 시뮬레이션"
+    echo "  bm-master     - 비즈니스 모델, 수익화"
+    echo "  product-planner - PRD 작성, 요구사항"
+    echo ""
+    echo -e "${BOLD}Presets (프리셋)${NC}"
+    echo "  full          - 전체 (Base + 모든 Domain)"
+    echo "  minimal       - 최소 (Base만)"
+    echo "  frontend      - Base + frontend, design, mobile"
+    echo "  backend       - Base + backend, devops, data-ml"
+    echo "  planner       - Base + pm, bm-master, product-planner"
+    echo "  qa            - Base + evil-user"
     echo ""
 }
 
@@ -135,6 +347,7 @@ main() {
     # Parse arguments
     local install_mode=""
     local target_dir=""
+    local preset=""
 
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -150,23 +363,21 @@ main() {
                 target_dir="$2"
                 shift 2
                 ;;
+            --preset|-p)
+                preset="$2"
+                shift 2
+                ;;
+            --list)
+                list_agents
+                exit 0
+                ;;
             --help|-h)
-                echo "사용법: install.sh [옵션]"
-                echo ""
-                echo "옵션:"
-                echo "  -g, --global    홈 디렉토리에 글로벌 설치 (~/.claude)"
-                echo "  -l, --local     현재 디렉토리에 프로젝트별 설치"
-                echo "  -d, --dir PATH  지정한 경로에 설치"
-                echo "  -h, --help      이 도움말 표시"
-                echo ""
-                echo "예시:"
-                echo "  curl -sL $REPO_RAW/install.sh | bash"
-                echo "  curl -sL $REPO_RAW/install.sh | bash -s -- --global"
-                echo "  curl -sL $REPO_RAW/install.sh | bash -s -- --dir /path/to/project"
+                show_help
                 exit 0
                 ;;
             *)
                 print_error "알 수 없는 옵션: $1"
+                echo "도움말: install.sh --help"
                 exit 1
                 ;;
         esac
@@ -177,7 +388,7 @@ main() {
 
     # Interactive mode selection if not specified
     if [ -z "$install_mode" ] && [ -z "$target_dir" ]; then
-        echo "설치 모드를 선택하세요:"
+        echo "설치 위치를 선택하세요:"
         echo ""
         echo "  1) 글로벌 설치 (모든 프로젝트에 적용)"
         echo "     위치: ~/.claude"
@@ -188,22 +399,44 @@ main() {
         read -p "선택 (1 또는 2): " mode_choice
 
         case $mode_choice in
-            1)
-                install_mode="global"
-                ;;
-            2)
-                install_mode="local"
-                ;;
-            *)
-                print_error "잘못된 선택입니다."
-                exit 1
-                ;;
+            1) install_mode="global" ;;
+            2) install_mode="local" ;;
+            *) print_error "잘못된 선택입니다."; exit 1 ;;
+        esac
+        echo ""
+    fi
+
+    # Interactive preset selection if not specified
+    if [ -z "$preset" ]; then
+        show_preset_menu
+        read -p "선택 (1-7): " preset_choice
+
+        case $preset_choice in
+            1) preset="all" ;;
+            2) preset="base" ;;
+            3) preset="${PRESETS[frontend]}" ;;
+            4) preset="${PRESETS[backend]}" ;;
+            5) preset="${PRESETS[planner]}" ;;
+            6) preset="${PRESETS[qa]}" ;;
+            7) preset=$(select_custom_agents) ;;
+            *) print_error "잘못된 선택입니다."; exit 1 ;;
+        esac
+        echo ""
+    else
+        # Map preset name to actual value
+        case $preset in
+            full) preset="all" ;;
+            minimal) preset="base" ;;
+            frontend) preset="${PRESETS[frontend]}" ;;
+            backend) preset="${PRESETS[backend]}" ;;
+            planner) preset="${PRESETS[planner]}" ;;
+            qa) preset="${PRESETS[qa]}" ;;
+            custom) preset=$(select_custom_agents) ;;
         esac
     fi
 
     # Determine target directory
     if [ -n "$target_dir" ]; then
-        # Use specified directory
         if [ ! -d "$target_dir" ]; then
             print_error "디렉토리가 존재하지 않습니다: $target_dir"
             exit 1
@@ -214,16 +447,16 @@ main() {
         target_dir="$(pwd)"
     fi
 
-    echo ""
     print_info "설치 경로: $target_dir/.claude"
+    print_info "프리셋: $preset"
     echo ""
 
     # Clone and install
     clone_repo
     backup_config "$target_dir"
-    install_config "$target_dir"
+    install_config "$target_dir" "$preset"
 
-    show_summary
+    show_summary "$preset"
 }
 
 # Run

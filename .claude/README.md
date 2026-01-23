@@ -9,21 +9,43 @@ Claude Code를 위한 커스텀 에이전트 및 슬래시 커맨드 모음입�
 ### 빠른 설치 (권장)
 
 ```bash
-# 대화형 설치 (글로벌 또는 프로젝트별 선택)
+# 대화형 설치 (위치 + 프리셋 선택)
 curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash
 ```
 
-**옵션 지정 설치:**
+### 프리셋 설치
+
+역할에 맞는 에이전트 조합을 선택할 수 있습니다:
+
+| 프리셋 | 설명 | 포함 에이전트 |
+|--------|------|--------------|
+| `full` | 전체 설치 | Base(5) + Domain(10) |
+| `minimal` | 최소 설치 | Base(5)만 |
+| `frontend` | 프론트엔드 개발자 | Base + Frontend, Design, Mobile |
+| `backend` | 백엔드 개발자 | Base + Backend, DevOps, Data/ML |
+| `planner` | 기획자/PM | Base + PM, BM Master, Product Planner |
+| `qa` | QA 엔지니어 | Base + Evil User |
+| `custom` | 직접 선택 | 개별 에이전트 선택 |
 
 ```bash
-# 글로벌 설치 (~/.claude)
-curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- --global
+# 프리셋으로 글로벌 설치
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -g -p frontend
 
-# 현재 디렉토리에 설치
-curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- --local
+# 프리셋으로 프로젝트 설치
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -l -p backend
 
-# 특정 경로에 설치
-curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- --dir /path/to/project
+# 직접 선택 모드
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -p custom
+```
+
+### 기타 옵션
+
+```bash
+# 에이전트 목록 보기
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- --list
+
+# 도움말
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- --help
 ```
 
 ### 수동 설치
