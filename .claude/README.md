@@ -6,37 +6,48 @@ Claude Code를 위한 커스텀 에이전트 및 슬래시 커맨드 모음입�
 
 ## 설치 방법
 
-### 글로벌 설치 (모든 프로젝트에 적용)
+### 빠른 설치 (권장)
 
 ```bash
-# 저장소 클론
+# 대화형 설치 (글로벌 또는 프로젝트별 선택)
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash
+```
+
+**옵션 지정 설치:**
+
+```bash
+# 글로벌 설치 (~/.claude)
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- --global
+
+# 현재 디렉토리에 설치
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- --local
+
+# 특정 경로에 설치
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- --dir /path/to/project
+```
+
+### 수동 설치
+
+<details>
+<summary>git clone 방식</summary>
+
+#### 글로벌 설치 (모든 프로젝트에 적용)
+
+```bash
 git clone https://github.com/andrewchoi-hds/claude-code-config.git
-
-# 홈 디렉토리로 복사
 cp -r claude-code-config/.claude ~/
-
-# 또는 기존 .claude가 있다면 내용만 병합
-cp -r claude-code-config/.claude/* ~/.claude/
-
-# 클론한 디렉토리 정리 (선택)
 rm -rf claude-code-config
 ```
 
-### 프로젝트별 설치
+#### 프로젝트별 설치
 
 ```bash
-# 저장소 클론 후 특정 프로젝트에만 적용
 git clone https://github.com/andrewchoi-hds/claude-code-config.git
 cp -r claude-code-config/.claude /path/to/your/project/
 rm -rf claude-code-config
 ```
 
-### 원라이너 설치
-
-```bash
-# 글로벌 설치 (한 줄)
-git clone https://github.com/andrewchoi-hds/claude-code-config.git && cp -r claude-code-config/.claude ~/ && rm -rf claude-code-config
-```
+</details>
 
 ## 사용 가능한 커맨드
 
