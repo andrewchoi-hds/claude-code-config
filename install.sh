@@ -189,7 +189,6 @@ install_config() {
 
     # Always copy base files
     cp "$source_dir/CLAUDE.md" "$dest_dir/"
-    cp "$source_dir/README.md" "$dest_dir/"
 
     # Copy all commands
     cp "$source_dir/commands/"*.md "$dest_dir/commands/"
