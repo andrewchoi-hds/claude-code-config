@@ -81,6 +81,14 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -l -p custom
 ```
 
+## 업데이트
+
+기존 설치를 최신 버전으로 업데이트합니다. **CLAUDE.md, state, settings는 보존**됩니다.
+
+```bash
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- --update
+```
+
 ## 기타 명령어
 
 ```bash
@@ -176,7 +184,7 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 - [x] `/wrap` 세션 마무리 커맨드 (세션 요약, 문서화 제안, 후속 작업 정리)
 - [x] 에이전트 간 컨텍스트 공유 개선 (session-context.json v2.0 프로토콜)
 - [x] MCP 서버 연동 에이전트 (GitHub, Design, Notify)
-- [ ] 프리셋 업데이트 명령어 (`install.sh --update`)
+- [x] 프리셋 업데이트 명령어 (`install.sh --update`)
 - [ ] 에이전트 성능 메트릭 수집 및 리포트
 - [ ] 멀티 프로젝트 워크스페이스 지원
 

@@ -303,6 +303,10 @@ show_help() {
     echo "      qa              QA 엔지니어용"
     echo "      custom          직접 선택"
     echo ""
+    echo "업데이트:"
+    echo "  -u, --update        기존 설치를 최신 버전으로 업데이트"
+    echo "                      (CLAUDE.md, state, settings 보존)"
+    echo ""
     echo "기타:"
     echo "  -h, --help          이 도움말 표시"
     echo "  --list              사용 가능한 에이전트 목록"
@@ -311,11 +315,14 @@ show_help() {
     echo "  # 대화형 설치"
     echo "  curl -sL $REPO_RAW/install.sh | bash"
     echo ""
-    echo "  # 프론트엔드 프리셋으로 글로벌 설치"
-    echo "  curl -sL $REPO_RAW/install.sh | bash -s -- -g -p frontend"
+    echo "  # 프론트엔드 프리셋으로 로컬 설치"
+    echo "  curl -sL $REPO_RAW/install.sh | bash -s -- -l -p frontend"
     echo ""
     echo "  # 백엔드 프리셋으로 특정 프로젝트에 설치"
     echo "  curl -sL $REPO_RAW/install.sh | bash -s -- -d /my/project -p backend"
+    echo ""
+    echo "  # 기존 설치 업데이트 (설정 보존)"
+    echo "  curl -sL $REPO_RAW/install.sh | bash -s -- --update"
 }
 
 # List agents
@@ -353,6 +360,110 @@ list_agents() {
     echo ""
 }
 
+# Update existing installation (preserves CLAUDE.md customizations and state)
+update_config() {
+    local target_dir=$1
+    local dest_dir="$target_dir/.claude"
+    local source_dir="$TEMP_DIR/repo/.claude"
+
+    if [ ! -d "$dest_dir" ]; then
+        print_error ".claude 디렉토리가 없습니다: $dest_dir"
+        echo "  먼저 설치를 진행하세요."
+        exit 1
+    fi
+
+    print_info "업데이트 시작: $dest_dir"
+    echo ""
+
+    # Preserve user customizations
+    local preserved_files=""
+
+    # 1. Preserve CLAUDE.md if user modified it
+    if [ -f "$dest_dir/CLAUDE.md" ]; then
+        cp "$dest_dir/CLAUDE.md" "$TEMP_DIR/CLAUDE.md.user"
+        preserved_files="CLAUDE.md"
+    fi
+
+    # 2. Preserve state files
+    if [ -d "$dest_dir/state" ]; then
+        cp -r "$dest_dir/state" "$TEMP_DIR/state.backup"
+        preserved_files="$preserved_files, state/"
+    fi
+
+    # 3. Preserve settings
+    if [ -f "$dest_dir/settings.local.json" ]; then
+        cp "$dest_dir/settings.local.json" "$TEMP_DIR/settings.local.json"
+        preserved_files="$preserved_files, settings.local.json"
+    fi
+
+    print_info "보존 대상: $preserved_files"
+
+    # 4. Update commands
+    if [ -d "$source_dir/commands" ]; then
+        mkdir -p "$dest_dir/commands"
+        local cmd_count=0
+        for cmd_file in "$source_dir/commands/"*.md; do
+            if [ -f "$cmd_file" ]; then
+                cp "$cmd_file" "$dest_dir/commands/"
+                cmd_count=$((cmd_count + 1))
+            fi
+        done
+        print_success "커맨드 업데이트됨 (${cmd_count}개)"
+    fi
+
+    # 5. Update agents
+    if [ -d "$source_dir/agents" ]; then
+        mkdir -p "$dest_dir/agents/base"
+        mkdir -p "$dest_dir/agents/domain"
+
+        local agent_count=0
+        for agent_file in "$source_dir/agents/base/"*.md; do
+            if [ -f "$agent_file" ]; then
+                cp "$agent_file" "$dest_dir/agents/base/"
+                agent_count=$((agent_count + 1))
+            fi
+        done
+        for agent_file in "$source_dir/agents/domain/"*.md; do
+            if [ -f "$agent_file" ]; then
+                cp "$agent_file" "$dest_dir/agents/domain/"
+                agent_count=$((agent_count + 1))
+            fi
+        done
+        print_success "에이전트 업데이트됨 (${agent_count}개)"
+    fi
+
+    # 6. Restore preserved files
+    if [ -f "$TEMP_DIR/CLAUDE.md.user" ]; then
+        cp "$TEMP_DIR/CLAUDE.md.user" "$dest_dir/CLAUDE.md"
+        print_success "CLAUDE.md 사용자 설정 보존됨"
+    fi
+
+    if [ -d "$TEMP_DIR/state.backup" ]; then
+        cp -r "$TEMP_DIR/state.backup/"* "$dest_dir/state/" 2>/dev/null || true
+        print_success "상태 파일 보존됨"
+    fi
+
+    if [ -f "$TEMP_DIR/settings.local.json" ]; then
+        cp "$TEMP_DIR/settings.local.json" "$dest_dir/settings.local.json"
+        print_success "설정 파일 보존됨"
+    fi
+
+    echo ""
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${GREEN}${BOLD}업데이트 완료!${NC}"
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo "업데이트된 내용:"
+    echo "  • 커맨드: 최신 버전으로 교체"
+    echo "  • 에이전트: 최신 버전으로 교체"
+    echo ""
+    echo "보존된 내용:"
+    echo "  • CLAUDE.md: 사용자 설정 유지"
+    echo "  • state/: 세션 데이터 유지"
+    echo "  • settings.local.json: 로컬 설정 유지"
+    echo ""
+}
+
 # Main installation flow
 main() {
     print_header
@@ -380,6 +491,10 @@ main() {
                 preset="$2"
                 shift 2
                 ;;
+            --update|-u)
+                install_mode="update"
+                shift
+                ;;
             --list)
                 list_agents
                 exit 0
@@ -398,6 +513,27 @@ main() {
 
     # Check dependencies
     check_dependencies
+
+    # Handle update mode
+    if [ "$install_mode" = "update" ]; then
+        if [ -n "$target_dir" ]; then
+            : # use specified dir
+        elif [ -d "$(pwd)/.claude" ]; then
+            target_dir="$(pwd)"
+        elif [ -d "$HOME/.claude" ]; then
+            target_dir="$HOME"
+        else
+            print_error ".claude 디렉토리를 찾을 수 없습니다."
+            echo "  -d 옵션으로 경로를 지정하거나, .claude가 있는 디렉토리에서 실행하세요."
+            exit 1
+        fi
+
+        print_info "업데이트 대상: $target_dir/.claude"
+        echo ""
+        clone_repo
+        update_config "$target_dir"
+        exit 0
+    fi
 
     # Interactive mode selection if not specified
     if [ -z "$install_mode" ] && [ -z "$target_dir" ]; then
