@@ -24,42 +24,42 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 > Base(5) + Domain(10) = 15개 에이전트
 
 ```bash
-curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -g -p full
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -l -p full
 ```
 
 #### 2. Minimal (최소) - 기본만
 > Base(5) 에이전트만
 
 ```bash
-curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -g -p minimal
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -l -p minimal
 ```
 
 #### 3. Frontend (프론트엔드 개발자)
 > Base + Frontend, Design, Mobile
 
 ```bash
-curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -g -p frontend
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -l -p frontend
 ```
 
 #### 4. Backend (백엔드 개발자)
 > Base + Backend, DevOps, Data/ML
 
 ```bash
-curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -g -p backend
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -l -p backend
 ```
 
 #### 5. Planner (기획자/PM)
 > Base + PM, BM Master, Product Planner
 
 ```bash
-curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -g -p planner
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -l -p planner
 ```
 
 #### 6. QA (품질관리)
 > Base + Evil User
 
 ```bash
-curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -g -p qa
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -l -p qa
 ```
 
 #### 프리셋 요약
@@ -73,14 +73,14 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 | 5 | `planner` | 기획자 | Base + PM, BM Master, Product Planner |
 | 6 | `qa` | QA | Base + Evil User |
 
-> **참고**: `-g`를 `-l`로 바꾸면 현재 디렉토리에 프로젝트별 설치됩니다.
+> **참고**: `-l`을 `-g`로 바꾸면 홈 디렉토리에 글로벌 설치됩니다 (`~/.claude`).
 
 ### 직접 선택 설치
 
 원하는 에이전트만 골라서 설치:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -g -p custom
+curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -l -p custom
 ```
 
 ### 기타 옵션
