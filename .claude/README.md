@@ -1,8 +1,11 @@
 # Claude Code Custom Agents & Commands
 
 [![GitHub](https://img.shields.io/badge/GitHub-andrewchoi--hds%2Fclaude--code--config-blue?logo=github)](https://github.com/andrewchoi-hds/claude-code-config)
+[![Claude](https://img.shields.io/badge/Claude-Opus%204.6-blueviolet?logo=anthropic)](https://docs.anthropic.com)
 
 Claude Code를 위한 커스텀 에이전트 및 슬래시 커맨드 모음입니다.
+
+> **Claude Opus 4.6** 기반으로 최적화되었습니다. Sonnet 4.5, Haiku 4.5에서도 사용 가능합니다.
 
 ## 설치 방법
 
@@ -231,9 +234,26 @@ rm -rf claude-code-config
 
 `agents/domain/` 또는 `agents/base/`의 `.md` 파일을 수정하여 에이전트 동작 커스터마이징 가능
 
+## 지원 모델
+
+| 모델 | Model ID | 권장 용도 |
+|------|----------|----------|
+| **Opus 4.6** | `claude-opus-4-6` | 복잡한 분석, 아키텍처 설계, 코드 리뷰 |
+| **Sonnet 4.5** | `claude-sonnet-4-5-20250929` | 일반 개발, 테스트, 문서화 |
+| **Haiku 4.5** | `claude-haiku-4-5-20251001` | 빠른 탐색, 간단한 수정 |
+
+## 향후 개선 예정
+
+- [ ] `/wrap` 세션 마무리 커맨드 (세션 요약, 문서화 제안, 후속 작업 정리)
+- [ ] 에이전트 간 컨텍스트 공유 개선 (session-context.json 활용 강화)
+- [ ] MCP 서버 연동 에이전트 (Pencil, GitHub, Slack 등)
+- [ ] 프리셋 업데이트 명령어 (`install.sh --update`)
+- [ ] 에이전트 성능 메트릭 수집 및 리포트
+- [ ] 멀티 프로젝트 워크스페이스 지원
+
 ## 요구사항
 
-- Claude Code CLI
+- Claude Code CLI (Opus 4.6 권장)
 - Git (일부 커맨드에서 필요)
 - gh CLI (GitHub PR 리뷰 기능에서 필요)
 

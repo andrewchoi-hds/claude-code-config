@@ -1,5 +1,7 @@
 # Global Claude Code Configuration
 
+> Optimized for **Claude Opus 4.6** (`claude-opus-4-6`)
+
 ## Language Rule
 
 - 모든 응답과 출력은 **한국어**로 작성합니다.
