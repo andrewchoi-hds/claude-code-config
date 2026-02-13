@@ -211,10 +211,22 @@ git diff --staged --stat      # 스테이징된 변경사항
 /wrap review --commit
 ```
 
+## Step 8: 메트릭 자동 저장
+
+세션 종료 시 메트릭을 `metrics.json`에 자동 기록합니다:
+
+1. `session-context.json`에서 현재 세션 데이터 수집
+2. git 활동 (커밋, 파일 변경, 라인 추가/삭제) 집계
+3. `~/.claude/state/metrics.json`에 세션 기록 추가
+4. `/metrics report`로 누적 리포트 확인 안내
+
+---
+
 ## Notes
 
 - `/init`으로 프로젝트 컨텍스트가 설정되어 있으면 더 정확한 분석 가능
 - `--save` 옵션은 auto memory 디렉토리에 학습 내용 저장
 - `--commit` 옵션은 커밋을 직접 수행하지 않고 메시지만 제안
 - `/todo`와 연동하여 미완료 작업을 TODO에 자동 등록 가능
+- `/metrics`에 세션 데이터를 자동 기록
 - 세션 시작 시 `/init`, 종료 시 `/wrap` 사용을 권장

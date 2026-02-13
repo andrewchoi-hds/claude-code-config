@@ -131,6 +131,7 @@ The following slash commands are available globally:
 | `/deploy` | Deployment checklist | DevOps |
 | `/optimize` | Optimization analysis | Domain |
 | `/wrap` | Session wrap-up | All |
+| `/metrics` | Agent performance metrics | All |
 
 ## Session Context (Shared State Protocol)
 

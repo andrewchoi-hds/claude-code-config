@@ -101,7 +101,7 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 
 ## 포함된 내용
 
-### 슬래시 커맨드 (11개)
+### 슬래시 커맨드 (12개)
 
 | 커맨드 | 설명 |
 |--------|------|
@@ -116,6 +116,7 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 | `/deploy` | 배포 체크리스트 |
 | `/optimize` | 최적화 분석 |
 | `/wrap` | 세션 마무리 (요약, 학습 기록, 후속 작업) |
+| `/metrics` | 에이전트 성능 메트릭 리포트 |
 
 ### Base Agents (5개)
 
@@ -151,7 +152,7 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 .claude/
 ├── CLAUDE.md              # 글로벌 설정 및 규칙
 ├── README.md              # 상세 문서
-├── commands/              # 슬래시 커맨드 (11개)
+├── commands/              # 슬래시 커맨드 (12개)
 ├── agents/
 │   ├── base/              # 기본 에이전트 (5개)
 │   └── domain/            # 도메인 에이전트 (10개)
@@ -185,7 +186,7 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 - [x] 에이전트 간 컨텍스트 공유 개선 (session-context.json v2.0 프로토콜)
 - [x] MCP 서버 연동 에이전트 (GitHub, Design, Notify)
 - [x] 프리셋 업데이트 명령어 (`install.sh --update`)
-- [ ] 에이전트 성능 메트릭 수집 및 리포트
+- [x] 에이전트 성능 메트릭 수집 및 리포트 (`/metrics`)
 - [ ] 멀티 프로젝트 워크스페이스 지원
 
 ## 요구사항

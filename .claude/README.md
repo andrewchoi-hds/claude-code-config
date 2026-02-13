@@ -131,6 +131,7 @@ rm -rf claude-code-config
 | `/deploy` | 배포 체크리스트 | `/deploy check --env=prod` |
 | `/optimize` | 최적화 분석 | `/optimize --type=perf` |
 | `/wrap` | 세션 마무리 | `/wrap full --save` |
+| `/metrics` | 에이전트 성능 메트릭 | `/metrics report --period=week` |
 
 ## 에이전트 구성
 
@@ -178,7 +179,8 @@ rm -rf claude-code-config
 │   ├── tdd.md
 │   ├── deploy.md
 │   ├── optimize.md
-│   └── wrap.md
+│   ├── wrap.md
+│   └── metrics.md
 ├── agents/                # 에이전트 컨텍스트
 │   ├── base/              # 기본 에이전트
 │   │   ├── explorer.md
@@ -256,7 +258,7 @@ rm -rf claude-code-config
 - [x] 에이전트 간 컨텍스트 공유 개선 (session-context.json v2.0 프로토콜)
 - [x] MCP 서버 연동 에이전트 (GitHub, Design, Notify)
 - [x] 프리셋 업데이트 명령어 (`install.sh --update`)
-- [ ] 에이전트 성능 메트릭 수집 및 리포트
+- [x] 에이전트 성능 메트릭 수집 및 리포트 (`/metrics`)
 - [ ] 멀티 프로젝트 워크스페이스 지원
 
 ## 요구사항
