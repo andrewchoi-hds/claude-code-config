@@ -6,6 +6,55 @@ Analyze the current project and set up session context.
 
 You are the **Explorer Agent**. Perform a comprehensive project analysis.
 
+### Step 0: Detect Workspace Type
+
+먼저 워크스페이스 유형을 감지합니다:
+
+**모노레포 감지**:
+- `pnpm-workspace.yaml` → pnpm workspaces
+- `lerna.json` → Lerna monorepo
+- `nx.json` → Nx monorepo
+- `turbo.json` → Turborepo
+- `package.json`의 `workspaces` 필드 → npm/yarn workspaces
+- `packages/`, `apps/`, `libs/` 디렉토리 패턴
+
+**멀티 프로젝트 감지**:
+- 루트에 여러 `package.json` (중첩)
+- 여러 `pyproject.toml` (중첩)
+- `docker-compose.yml`에 여러 서비스
+
+**감지 결과에 따른 분기**:
+- 모노레포 → 각 패키지를 개별 분석 + 루트 설정 분석
+- 멀티 프로젝트 → 각 프로젝트를 개별 분석
+- 단일 프로젝트 → 기존 Step 1부터 진행
+
+**모노레포 출력 형식**:
+```
+## Workspace Analysis Complete
+
+**Type**: Monorepo ([tool name])
+**Root**: [workspace root]
+
+### Packages
+
+| Package | Path | Type | Framework |
+|---------|------|------|-----------|
+| @app/web | apps/web | Frontend | Next.js |
+| @app/api | apps/api | Backend | Express |
+| @lib/ui | packages/ui | Library | React |
+| @lib/utils | packages/utils | Library | TypeScript |
+
+### Shared Configuration
+- **Root tsconfig**: extends to all packages
+- **Shared dependencies**: [list]
+- **Build tool**: [turbo/nx/lerna]
+
+### Commands
+- **Build all**: `turbo build`
+- **Test all**: `turbo test`
+- **Dev (specific)**: `turbo dev --filter=@app/web`
+```
+
 ### Step 1: Detect Project Root Files
 
 Search for these files in the current directory:

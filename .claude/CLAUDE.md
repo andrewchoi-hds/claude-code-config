@@ -89,6 +89,19 @@ When a domain is detected, apply the corresponding agent context:
 - **React + Storybook**: Frontend (primary) + Design (secondary)
 - **FastAPI + PyTorch**: Backend (primary) + Data/ML (secondary)
 
+### Monorepo / Multi-Project Workspace
+
+모노레포가 감지되면:
+1. 루트 워크스페이스 설정을 먼저 분석 (turbo.json, nx.json 등)
+2. 각 패키지를 개별 프로젝트로 취급하여 도메인 분류
+3. `workspace.activePackage`로 현재 작업 중인 패키지 추적
+4. 커맨드 실행 시 활성 패키지에 맞는 에이전트 자동 선택
+
+**패키지 전환**:
+- `/init apps/web` → activePackage를 `@app/web`으로 전환
+- `/init apps/api` → activePackage를 `@app/api`로 전환
+- `/init` (루트) → 전체 워크스페이스 분석
+
 ## Error Handling Policy
 
 1. **File/path not found**: Clear error message + suggest similar paths
@@ -143,6 +156,21 @@ All agents share context through `~/.claude/state/session-context.json` (global)
 {
   "version": "2.0",
   "lastUpdated": "ISO-8601 timestamp",
+  "workspace": {
+    "type": "single | monorepo | multi",
+    "tool": "turbo | nx | lerna | pnpm | npm | yarn | null",
+    "root": "/absolute/workspace/root",
+    "packages": [
+      {
+        "name": "@app/web",
+        "path": "apps/web",
+        "language": "typescript",
+        "framework": "next.js",
+        "domain": "frontend"
+      }
+    ],
+    "activePackage": "@app/web"
+  },
   "project": {
     "name": "project-name",
     "path": "/absolute/path",

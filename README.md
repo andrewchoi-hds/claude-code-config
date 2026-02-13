@@ -187,7 +187,7 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 - [x] MCP 서버 연동 에이전트 (GitHub, Design, Notify)
 - [x] 프리셋 업데이트 명령어 (`install.sh --update`)
 - [x] 에이전트 성능 메트릭 수집 및 리포트 (`/metrics`)
-- [ ] 멀티 프로젝트 워크스페이스 지원
+- [x] 멀티 프로젝트 워크스페이스 지원 (모노레포 감지/패키지 전환)
 
 ## 요구사항
 
