@@ -130,6 +130,7 @@ rm -rf claude-code-config
 | `/tdd` | TDD 워크플로우 가이드 | `/tdd "user auth"` |
 | `/deploy` | 배포 체크리스트 | `/deploy check --env=prod` |
 | `/optimize` | 최적화 분석 | `/optimize --type=perf` |
+| `/wrap` | 세션 마무리 | `/wrap full --save` |
 
 ## 에이전트 구성
 
@@ -173,7 +174,8 @@ rm -rf claude-code-config
 │   ├── doc.md
 │   ├── tdd.md
 │   ├── deploy.md
-│   └── optimize.md
+│   ├── optimize.md
+│   └── wrap.md
 ├── agents/                # 에이전트 컨텍스트
 │   ├── base/              # 기본 에이전트
 │   │   ├── explorer.md
@@ -208,7 +210,7 @@ rm -rf claude-code-config
 프로젝트의 `package.json`, `pyproject.toml` 등을 분석하여 자동으로 적합한 도메인 에이전트 활성화
 
 ### 워크플로우 지원
-- `/init` → `/map` → 개발 → `/test` → `/review` → `/deploy`
+- `/init` → `/map` → 개발 → `/test` → `/review` → `/deploy` → `/wrap`
 
 ## 커스터마이징
 
@@ -244,7 +246,7 @@ rm -rf claude-code-config
 
 ## 향후 개선 예정
 
-- [ ] `/wrap` 세션 마무리 커맨드 (세션 요약, 문서화 제안, 후속 작업 정리)
+- [x] `/wrap` 세션 마무리 커맨드 (세션 요약, 문서화 제안, 후속 작업 정리)
 - [ ] 에이전트 간 컨텍스트 공유 개선 (session-context.json 활용 강화)
 - [ ] MCP 서버 연동 에이전트 (Pencil, GitHub, Slack 등)
 - [ ] 프리셋 업데이트 명령어 (`install.sh --update`)

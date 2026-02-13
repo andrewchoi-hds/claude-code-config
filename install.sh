@@ -120,8 +120,8 @@ backup_config() {
 show_preset_menu() {
     echo -e "${BOLD}설치 프리셋을 선택하세요:${NC}"
     echo ""
-    print_preset "1" "Full (전체)" "모든 에이전트와 커맨드 설치" "Base(5) + Domain(10) + Commands(10)"
-    print_preset "2" "Minimal (최소)" "기본 에이전트와 커맨드만" "Base(5) + Commands(10)"
+    print_preset "1" "Full (전체)" "모든 에이전트와 커맨드 설치" "Base(5) + Domain(10) + Commands(11)"
+    print_preset "2" "Minimal (최소)" "기본 에이전트와 커맨드만" "Base(5) + Commands(11)"
     print_preset "3" "Frontend (프론트엔드)" "웹/앱 프론트엔드 개발자용" "Base + Frontend, Design, Mobile"
     print_preset "4" "Backend (백엔드)" "서버/인프라 개발자용" "Base + Backend, DevOps, Data/ML"
     print_preset "5" "Planner (기획자)" "PM/기획자용" "Base + PM, BM Master, Product Planner"
@@ -192,7 +192,7 @@ install_config() {
 
     # Copy all commands
     cp "$source_dir/commands/"*.md "$dest_dir/commands/"
-    print_success "커맨드 설치됨 (10개)"
+    print_success "커맨드 설치됨 (11개)"
 
     # Copy base agents
     for agent in $BASE_AGENTS; do
@@ -248,8 +248,8 @@ show_summary() {
     echo -e "${BOLD}설치된 프리셋:${NC} $preset"
     echo ""
     echo "포함된 내용:"
-    echo "  • 슬래시 커맨드 10개"
-    echo "    /init, /map, /analyze, /test, /todo"
+    echo "  • 슬래시 커맨드 11개"
+    echo "    /init, /map, /analyze, /test, /todo, /wrap"
     echo "    /review, /doc, /tdd, /deploy, /optimize"
     echo ""
     echo "  • 기본 에이전트 5개"

@@ -130,6 +130,7 @@ The following slash commands are available globally:
 | `/tdd` | TDD workflow guide | Tester + Domain |
 | `/deploy` | Deployment checklist | DevOps |
 | `/optimize` | Optimization analysis | Domain |
+| `/wrap` | Session wrap-up | All |
 
 ## Session Context
 

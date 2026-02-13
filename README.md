@@ -93,7 +93,7 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 
 ## 포함된 내용
 
-### 슬래시 커맨드 (10개)
+### 슬래시 커맨드 (11개)
 
 | 커맨드 | 설명 |
 |--------|------|
@@ -107,6 +107,7 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 | `/tdd` | TDD 워크플로우 가이드 |
 | `/deploy` | 배포 체크리스트 |
 | `/optimize` | 최적화 분석 |
+| `/wrap` | 세션 마무리 (요약, 학습 기록, 후속 작업) |
 
 ### Base Agents (5개)
 
@@ -139,7 +140,7 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 .claude/
 ├── CLAUDE.md              # 글로벌 설정 및 규칙
 ├── README.md              # 상세 문서
-├── commands/              # 슬래시 커맨드 (10개)
+├── commands/              # 슬래시 커맨드 (11개)
 ├── agents/
 │   ├── base/              # 기본 에이전트 (5개)
 │   └── domain/            # 도메인 에이전트 (10개)
@@ -156,6 +157,7 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 /analyze   # 코드 분석
 /test      # 테스트 실행
 /review    # 코드 리뷰
+/wrap      # 세션 마무리
 ```
 
 ## 지원 모델
@@ -168,7 +170,7 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 
 ## 향후 개선 예정
 
-- [ ] `/wrap` 세션 마무리 커맨드 (세션 요약, 문서화 제안, 후속 작업 정리)
+- [x] `/wrap` 세션 마무리 커맨드 (세션 요약, 문서화 제안, 후속 작업 정리)
 - [ ] 에이전트 간 컨텍스트 공유 개선 (session-context.json 활용 강화)
 - [ ] MCP 서버 연동 에이전트 (Pencil, GitHub, Slack 등)
 - [ ] 프리셋 업데이트 명령어 (`install.sh --update`)
