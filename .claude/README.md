@@ -21,7 +21,7 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 역할에 맞는 명령어를 복사해서 사용하세요:
 
 #### 1. Full (전체) - 모든 에이전트
-> Base(5) + Domain(10) = 15개 에이전트
+> Base(5) + Domain(13) = 15개 에이전트
 
 ```bash
 curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -l -p full
@@ -66,7 +66,7 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 
 | # | 프리셋 | 대상 | 포함 에이전트 |
 |---|--------|------|--------------|
-| 1 | `full` | 전체 | Base(5) + Domain(10) |
+| 1 | `full` | 전체 | Base(5) + Domain(13) |
 | 2 | `minimal` | 최소 | Base(5)만 |
 | 3 | `frontend` | 프론트엔드 | Base + Frontend, Design, Mobile |
 | 4 | `backend` | 백엔드 | Base + Backend, DevOps, Data/ML |
@@ -158,6 +158,9 @@ rm -rf claude-code-config
 | **Evil User** | 엣지케이스 발굴, 이탈 시나리오, QA 악질 유저 시뮬레이션 |
 | **BM Master** | 비즈니스 모델, 수익화 전략, KPI/지표 분석 |
 | **Product Planner** | PRD 작성/분석, 요구사항 정의, 유저 스토리 |
+| **MCP GitHub** | GitHub 이슈/PR/릴리스/Actions 연동 |
+| **MCP Design** | .pen 디자인 파일 분석/생성/코드 변환 |
+| **MCP Notify** | Slack/알림 자동화, 팀 커뮤니케이션 |
 
 ## 폴더 구조
 
@@ -193,7 +196,10 @@ rm -rf claude-code-config
 │       ├── pm.md
 │       ├── evil-user.md
 │       ├── bm-master.md
-│       └── product-planner.md
+│       ├── product-planner.md
+│       ├── mcp-github.md
+│       ├── mcp-design.md
+│       └── mcp-notify.md
 └── state/                 # 상태 저장
     ├── todos.json
     └── session-context.json
@@ -247,8 +253,8 @@ rm -rf claude-code-config
 ## 향후 개선 예정
 
 - [x] `/wrap` 세션 마무리 커맨드 (세션 요약, 문서화 제안, 후속 작업 정리)
-- [ ] 에이전트 간 컨텍스트 공유 개선 (session-context.json 활용 강화)
-- [ ] MCP 서버 연동 에이전트 (Pencil, GitHub, Slack 등)
+- [x] 에이전트 간 컨텍스트 공유 개선 (session-context.json v2.0 프로토콜)
+- [x] MCP 서버 연동 에이전트 (GitHub, Design, Notify)
 - [ ] 프리셋 업데이트 명령어 (`install.sh --update`)
 - [ ] 에이전트 성능 메트릭 수집 및 리포트
 - [ ] 멀티 프로젝트 워크스페이스 지원

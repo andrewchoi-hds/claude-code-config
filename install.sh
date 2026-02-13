@@ -21,7 +21,7 @@ TEMP_DIR=$(mktemp -d)
 
 # Agent definitions
 BASE_AGENTS="explorer tester e2e-tester reviewer documenter"
-DOMAIN_AGENTS="frontend backend mobile devops data-ml design pm evil-user bm-master product-planner"
+DOMAIN_AGENTS="frontend backend mobile devops data-ml design pm evil-user bm-master product-planner mcp-github mcp-design mcp-notify"
 
 # Preset definitions (function to avoid bash 4.0 requirement)
 get_preset() {
@@ -120,7 +120,7 @@ backup_config() {
 show_preset_menu() {
     echo -e "${BOLD}설치 프리셋을 선택하세요:${NC}"
     echo ""
-    print_preset "1" "Full (전체)" "모든 에이전트와 커맨드 설치" "Base(5) + Domain(10) + Commands(11)"
+    print_preset "1" "Full (전체)" "모든 에이전트와 커맨드 설치" "Base(5) + Domain(13) + Commands(11)"
     print_preset "2" "Minimal (최소)" "기본 에이전트와 커맨드만" "Base(5) + Commands(11)"
     print_preset "3" "Frontend (프론트엔드)" "웹/앱 프론트엔드 개발자용" "Base + Frontend, Design, Mobile"
     print_preset "4" "Backend (백엔드)" "서버/인프라 개발자용" "Base + Backend, DevOps, Data/ML"
@@ -146,6 +146,9 @@ select_custom_agents() {
     echo "  8) evil-user     - QA 악질 유저 시뮬레이션"
     echo "  9) bm-master     - 비즈니스 모델, 수익화"
     echo "  10) product-planner - PRD 작성, 요구사항"
+    echo "  11) mcp-github     - GitHub 이슈/PR/릴리스 연동"
+    echo "  12) mcp-design     - 디자인 파일(.pen) 연동"
+    echo "  13) mcp-notify     - Slack/알림 연동"
     echo ""
     echo "  0) 선택 완료"
     echo ""
@@ -164,6 +167,9 @@ select_custom_agents() {
             8) selected_domains+=("evil-user") ;;
             9) selected_domains+=("bm-master") ;;
             10) selected_domains+=("product-planner") ;;
+            11) selected_domains+=("mcp-github") ;;
+            12) selected_domains+=("mcp-design") ;;
+            13) selected_domains+=("mcp-notify") ;;
         esac
     done
 
@@ -262,6 +268,7 @@ show_summary() {
             all)
                 echo "    Frontend, Backend, Mobile, DevOps, Data/ML"
                 echo "    Design, PM, Evil User, BM Master, Product Planner"
+                echo "    MCP GitHub, MCP Design, MCP Notify"
                 ;;
             *)
                 echo "    $preset"
@@ -332,6 +339,9 @@ list_agents() {
     echo "  evil-user     - QA 악질 유저 시뮬레이션"
     echo "  bm-master     - 비즈니스 모델, 수익화"
     echo "  product-planner - PRD 작성, 요구사항"
+    echo "  mcp-github     - GitHub 이슈/PR/릴리스 연동"
+    echo "  mcp-design     - 디자인 파일(.pen) 연동"
+    echo "  mcp-notify     - Slack/알림 연동"
     echo ""
     echo -e "${BOLD}Presets (프리셋)${NC}"
     echo "  full          - 전체 (Base + 모든 Domain)"
