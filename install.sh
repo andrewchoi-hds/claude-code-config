@@ -236,8 +236,9 @@ install_config() {
     fi
 
     # Create empty state files
-    echo '{"version":"1.0","lastUpdated":null,"project":null,"stack":null,"domains":null,"commands":null,"structure":null}' > "$dest_dir/state/session-context.json"
+    echo '{"version":"2.0","lastUpdated":null,"workspace":null,"project":null,"domains":null,"commands":null,"structure":null,"session":null,"metrics":null}' > "$dest_dir/state/session-context.json"
     echo '{"version":"1.0","projects":{}}' > "$dest_dir/state/todos.json"
+    echo '{"version":"1.0","sessions":[],"totals":{"sessions":0,"commands":0,"files_modified":0,"lines_added":0,"lines_removed":0,"commits":0,"issues_found":0,"tests_run":0}}' > "$dest_dir/state/metrics.json"
 
     print_success "설치 완료: $dest_dir"
 }

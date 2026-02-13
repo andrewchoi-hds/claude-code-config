@@ -10,3 +10,4 @@
 # State files (session-specific)
 .claude/state/session-context.json
 .claude/state/todos.json
+.claude/state/metrics.json
