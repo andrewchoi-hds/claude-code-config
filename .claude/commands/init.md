@@ -127,8 +127,59 @@ No recognized package manager or build tool configuration found.
 Run `/map` to see the directory structure and identify project files manually.
 ```
 
+## Step 7: Save Session Context
+
+분석 결과를 `session-context.json`에 저장하여 다른 커맨드/에이전트와 공유합니다.
+
+**저장 경로**: `.claude/state/session-context.json` (프로젝트) 또는 `~/.claude/state/session-context.json` (글로벌)
+
+**저장 형식**:
+```json
+{
+  "version": "2.0",
+  "lastUpdated": "2025-01-15T10:00:00Z",
+  "project": {
+    "name": "detected-project-name",
+    "path": "/current/working/directory",
+    "language": "detected-language",
+    "framework": "detected-framework",
+    "runtime": "detected-runtime"
+  },
+  "domains": {
+    "primary": "detected-primary-domain",
+    "secondary": ["detected-secondary-domains"]
+  },
+  "commands": {
+    "test": "detected-test-command",
+    "build": "detected-build-command",
+    "lint": "detected-lint-command",
+    "dev": "detected-dev-command"
+  },
+  "structure": {
+    "entryPoint": "detected-entry-point",
+    "configFiles": ["list-of-config-files"],
+    "srcDir": "detected-src-directory",
+    "testDir": "detected-test-directory"
+  },
+  "session": {
+    "startedAt": "current-timestamp",
+    "commandsRun": ["/init"],
+    "filesModified": [],
+    "agentsUsed": ["explorer"]
+  },
+  "metrics": {
+    "commandCount": 1,
+    "filesAnalyzed": 0,
+    "issuesFound": 0,
+    "testsRun": 0
+  }
+}
+```
+
 ## Notes
 
 - This analysis sets the context for all subsequent commands
 - Domain detection affects which specialized advice is given
 - Detected commands are used by /test, /build, etc.
+- Session context is shared with all agents via session-context.json
+- Other commands read this context to avoid re-detecting project info

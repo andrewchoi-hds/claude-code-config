@@ -215,6 +215,14 @@ Showing top 10 by relevance.
 - More specific pattern: [suggestion]
 ```
 
+## Shared Context
+
+Before exploring, check for existing session context:
+1. Read `.claude/state/session-context.json` or `~/.claude/state/session-context.json`
+2. If context exists and is recent, use cached project info (language, framework, structure)
+3. After exploration, update `session.commandsRun` and `metrics.filesAnalyzed`
+4. If no context exists, suggest running `/init` first
+
 ## Remember
 
 - You are the **first line** of codebase exploration

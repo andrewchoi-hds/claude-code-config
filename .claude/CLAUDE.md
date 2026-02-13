@@ -132,13 +132,64 @@ The following slash commands are available globally:
 | `/optimize` | Optimization analysis | Domain |
 | `/wrap` | Session wrap-up | All |
 
-## Session Context
+## Session Context (Shared State Protocol)
 
-After running `/init`, the following information is stored for the session:
-- Detected language and framework
-- Primary and secondary domains
-- Test, build, and lint commands
-- Entry point file
-- Key configuration files
+All agents share context through `~/.claude/state/session-context.json` (global) or `.claude/state/session-context.json` (project).
 
-This context is automatically used by subsequent commands.
+### Context Schema
+
+```json
+{
+  "version": "2.0",
+  "lastUpdated": "ISO-8601 timestamp",
+  "project": {
+    "name": "project-name",
+    "path": "/absolute/path",
+    "language": "typescript",
+    "framework": "next.js",
+    "runtime": "node 20"
+  },
+  "domains": {
+    "primary": "frontend",
+    "secondary": ["backend"]
+  },
+  "commands": {
+    "test": "npm test",
+    "build": "npm run build",
+    "lint": "npm run lint",
+    "dev": "npm run dev"
+  },
+  "structure": {
+    "entryPoint": "src/app/page.tsx",
+    "configFiles": ["tsconfig.json", "next.config.js"],
+    "srcDir": "src/",
+    "testDir": "tests/"
+  },
+  "session": {
+    "startedAt": "ISO-8601 timestamp",
+    "commandsRun": ["/init", "/map"],
+    "filesModified": [],
+    "agentsUsed": ["explorer", "reviewer"]
+  },
+  "metrics": {
+    "commandCount": 0,
+    "filesAnalyzed": 0,
+    "issuesFound": 0,
+    "testsRun": 0
+  }
+}
+```
+
+### Agent Read/Write Protocol
+
+1. **Before executing**: Read session-context.json to get project info, skip re-detection
+2. **After executing**: Update relevant fields (commandsRun, metrics, etc.)
+3. **If context missing**: Suggest running `/init` first, or proceed with auto-detection
+4. **Priority**: session-context values override auto-detection results
+
+### Context Flow
+
+```
+/init (writes) → session-context.json → /test, /review, /analyze, etc. (reads)
+                                       → /wrap (reads + summarizes)
+```
