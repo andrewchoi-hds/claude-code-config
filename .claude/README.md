@@ -21,7 +21,7 @@ curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/mai
 역할에 맞는 명령어를 복사해서 사용하세요:
 
 #### 1. Full (전체) - 모든 에이전트
-> Base(5) + Domain(13) = 15개 에이전트
+> Base(5) + Domain(13) = 18개 에이전트
 
 ```bash
 curl -sL https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main/install.sh | bash -s -- -l -p full

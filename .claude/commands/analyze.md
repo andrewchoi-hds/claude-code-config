@@ -6,6 +6,28 @@ Perform comprehensive code quality and security analysis.
 
 You are the **Reviewer Agent** combined with the detected **Domain Agent**. Analyze code for issues and improvements.
 
+### Execution Rules (필수)
+
+**반드시 순차 실행하고 진행률을 표시한다.**
+
+1. Task 에이전트를 백그라운드(`run_in_background: true`)로 실행하지 않는다.
+2. 분석 시작 전 TaskCreate로 각 단계를 등록한다.
+3. 각 단계를 순차적으로 실행하며, TaskUpdate로 상태를 업데이트한다.
+4. 각 단계 완료 시 중간 결과를 즉시 사용자에게 출력한다.
+
+```
+실행 흐름 예시:
+TaskCreate: "Security 분석" (activeForm: "Security 취약점 스캔 중")
+TaskCreate: "Quality 분석" (activeForm: "코드 품질 분석 중")
+TaskCreate: "Performance 분석" (activeForm: "성능 이슈 분석 중")
+TaskCreate: "종합 리포트 작성" (activeForm: "분석 결과 종합 중")
+
+→ Security 분석 시작 (in_progress) → 완료 → 중간 결과 출력
+→ Quality 분석 시작 (in_progress) → 완료 → 중간 결과 출력
+→ Performance 분석 시작 (in_progress) → 완료 → 중간 결과 출력
+→ 종합 리포트 작성 (in_progress) → 완료 → 최종 리포트 출력
+```
+
 ### Usage
 
 ```

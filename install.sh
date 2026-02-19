@@ -23,6 +23,11 @@ TEMP_DIR=$(mktemp -d)
 BASE_AGENTS="explorer tester e2e-tester reviewer documenter"
 DOMAIN_AGENTS="frontend backend mobile devops data-ml design pm evil-user bm-master product-planner mcp-github mcp-design mcp-notify"
 
+# Dynamic counts (auto-calculated from agent lists)
+count_words() { echo $#; }
+BASE_COUNT=$(count_words $BASE_AGENTS)
+DOMAIN_COUNT=$(count_words $DOMAIN_AGENTS)
+
 # Preset definitions (function to avoid bash 4.0 requirement)
 get_preset() {
     case "$1" in
@@ -120,8 +125,11 @@ backup_config() {
 show_preset_menu() {
     echo -e "${BOLD}설치 프리셋을 선택하세요:${NC}"
     echo ""
-    print_preset "1" "Full (전체)" "모든 에이전트와 커맨드 설치" "Base(5) + Domain(13) + Commands(12)"
-    print_preset "2" "Minimal (최소)" "기본 에이전트와 커맨드만" "Base(5) + Commands(12)"
+    local cmd_total
+    cmd_total=$(ls "$TEMP_DIR/repo/.claude/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$cmd_total" = "0" ] || [ -z "$cmd_total" ]; then cmd_total="?"; fi
+    print_preset "1" "Full (전체)" "모든 에이전트와 커맨드 설치" "Base(${BASE_COUNT}) + Domain(${DOMAIN_COUNT}) + Commands(${cmd_total})"
+    print_preset "2" "Minimal (최소)" "기본 에이전트와 커맨드만" "Base(${BASE_COUNT}) + Commands(${cmd_total})"
     print_preset "3" "Frontend (프론트엔드)" "웹/앱 프론트엔드 개발자용" "Base + Frontend, Design, Mobile"
     print_preset "4" "Backend (백엔드)" "서버/인프라 개발자용" "Base + Backend, DevOps, Data/ML"
     print_preset "5" "Planner (기획자)" "PM/기획자용" "Base + PM, BM Master, Product Planner"
@@ -198,7 +206,9 @@ install_config() {
 
     # Copy all commands
     cp "$source_dir/commands/"*.md "$dest_dir/commands/"
-    print_success "커맨드 설치됨 (12개)"
+    local cmd_count
+    cmd_count=$(ls "$dest_dir/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
+    print_success "커맨드 설치됨 (${cmd_count}개)"
 
     # Copy base agents
     for agent in $BASE_AGENTS; do
@@ -206,7 +216,9 @@ install_config() {
             cp "$source_dir/agents/base/${agent}.md" "$dest_dir/agents/base/"
         fi
     done
-    print_success "기본 에이전트 설치됨 (5개)"
+    local base_installed
+    base_installed=$(ls "$dest_dir/agents/base/"*.md 2>/dev/null | wc -l | tr -d ' ')
+    print_success "기본 에이전트 설치됨 (${base_installed}개)"
 
     # Determine which domain agents to install
     local domains_to_install=""
@@ -254,12 +266,15 @@ show_summary() {
     echo ""
     echo -e "${BOLD}설치된 프리셋:${NC} $preset"
     echo ""
+    local installed_cmds installed_base
+    installed_cmds=$(ls "$target_dir/.claude/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
+    installed_base=$(ls "$target_dir/.claude/agents/base/"*.md 2>/dev/null | wc -l | tr -d ' ')
     echo "포함된 내용:"
-    echo "  • 슬래시 커맨드 12개"
+    echo "  • 슬래시 커맨드 ${installed_cmds}개"
     echo "    /init, /map, /analyze, /test, /todo, /wrap"
     echo "    /review, /doc, /tdd, /deploy, /optimize, /metrics"
     echo ""
-    echo "  • 기본 에이전트 5개"
+    echo "  • 기본 에이전트 ${installed_base}개"
     echo "    Explorer, Tester, E2E Tester, Reviewer, Documenter"
     echo ""
 
@@ -352,8 +367,8 @@ list_agents() {
     echo "  mcp-notify     - Slack/알림 연동"
     echo ""
     echo -e "${BOLD}Presets (프리셋)${NC}"
-    echo "  full          - 전체 (Base + 모든 Domain)"
-    echo "  minimal       - 최소 (Base만)"
+    echo "  full          - 전체 (Base(${BASE_COUNT}) + Domain(${DOMAIN_COUNT}))"
+    echo "  minimal       - 최소 (Base(${BASE_COUNT})만)"
     echo "  frontend      - Base + frontend, design, mobile"
     echo "  backend       - Base + backend, devops, data-ml"
     echo "  planner       - Base + pm, bm-master, product-planner"

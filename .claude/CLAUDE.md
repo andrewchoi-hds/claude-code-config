@@ -10,11 +10,12 @@
 
 ## Token Optimization Principles
 
-1. **Delegate exploration tasks** to Explorer agent (use Task tool with subagent_type=Explore)
-2. **Read only necessary lines** from large files (use offset, limit parameters)
-3. **Cache repeated searches** - reuse /map and /init results within session
-4. **Skip irrelevant files** - focus on files related to the current task
-5. **Summarize directory contents** - show file counts instead of listing all files
+1. **Read only necessary lines** from large files (use offset, limit parameters)
+2. **Cache repeated searches** - reuse /map and /init results within session
+3. **Skip irrelevant files** - focus on files related to the current task
+4. **Summarize directory contents** - show file counts instead of listing all files
+5. **에이전트 결과 압축** - 에이전트 반환 결과를 그대로 출력하지 말고 핵심만 요약
+6. **경량 모델 활용** - 탐색/검색에는 haiku, 분석에는 sonnet 사용
 
 ## Default Workflow
 
@@ -30,6 +31,75 @@
 - **DO NOT** output contents of sensitive files: `.env`, `.env.*`, `credentials.*`, `secrets.*`, `*.pem`, `*.key`
 - **DO NOT** process large binary files: images, fonts, videos, compiled binaries
 - **AVOID** reading files over 1000 lines in full - use offset/limit or search specific patterns
+
+## Agent Execution Policy (에이전트 실행 정책)
+
+### 백그라운드 실행 금지
+
+- **DO NOT** use `run_in_background: true` for Task agents. 모든 에이전트는 **포그라운드에서 순차 실행**한다.
+- 사용자가 진행 상황을 실시간으로 확인할 수 없는 백그라운드 실행은 금지한다.
+- 유일한 예외: 사용자가 **명시적으로** 백그라운드 실행을 요청한 경우.
+
+### 진행률 추적 필수 (TaskCreate/TaskUpdate)
+
+멀티스텝 작업(분석, 리뷰, 테스트 등)을 수행할 때 반드시 다음 패턴을 따른다:
+
+1. **작업 시작 전**: `TaskCreate`로 각 단계를 등록
+2. **단계 시작 시**: `TaskUpdate(status: "in_progress")`로 현재 진행 단계 표시
+3. **단계 완료 시**: `TaskUpdate(status: "completed")`로 완료 표시
+4. **다음 단계**: 순차적으로 다음 TaskUpdate 실행
+
+```
+예시 흐름:
+[1/4] Security 분석 ← in_progress (activeForm: "Security 취약점 분석 중")
+[2/4] Quality 분석 ← pending
+[3/4] Performance 분석 ← pending
+[4/4] 종합 리포트 작성 ← pending
+```
+
+### 에이전트 병렬 실행 제한
+
+- 여러 도메인 에이전트를 동시에 실행하지 않는다.
+- 각 에이전트의 결과를 사용자에게 **순차적으로 표시**한 후 다음 에이전트를 실행한다.
+- Task 에이전트를 사용할 때 **최대 1개**만 동시에 실행한다.
+
+### 중간 결과 표시
+
+- 각 분석 단계가 완료될 때마다 **중간 결과를 즉시 출력**한다.
+- 전체 완료를 기다리지 말고, 단계별로 사용자에게 피드백을 제공한다.
+
+### 컨텍스트 절약 (토큰 효율화)
+
+에이전트는 적극적으로 활용하되, 컨텍스트 낭비를 줄이는 방식으로 사용한다.
+
+#### 1. 적절한 모델 선택
+
+| 작업 유형 | 모델 | max_turns |
+|-----------|------|-----------|
+| 파일 탐색/검색 | haiku | 6 |
+| 코드 분석/리뷰 | sonnet | 10 |
+| 복잡한 아키텍처 판단 | opus | 12 |
+
+#### 2. 에이전트 프롬프트 최적화
+
+- 프롬프트에 **"결과를 요약하여 반환하라"** 명시
+- 필요한 정보만 구체적으로 요청 (예: "보안 취약점만 찾아라", "파일 경로 목록만 반환하라")
+- 이전 단계에서 수집한 정보를 프롬프트에 포함하여 에이전트의 재탐색 방지
+
+#### 3. 결과 압축 출력
+
+- 에이전트가 반환한 결과를 **그대로 전문 출력하지 않는다**
+- 핵심을 요약하여 전달하고, 상세 내용은 사용자 요청 시 제공
+
+```
+나쁜 예: 에이전트 결과 전문 500줄 그대로 출력
+좋은 예: "보안 분석 결과: 취약점 3건 (Critical 1, High 2). 상세 내용을 볼까요?"
+```
+
+#### 4. 중복 작업 금지
+
+- Task 에이전트에 위임한 작업을 본체에서 동일하게 반복하지 않는다
+- 이전 단계 결과를 다음 에이전트 프롬프트에 포함하여 재탐색 방지
 
 ## Project Type Detection
 
