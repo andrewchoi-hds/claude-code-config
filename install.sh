@@ -3,7 +3,7 @@
 # Claude Code Config Installer
 # https://github.com/andrewchoi-hds/claude-code-config
 
-set -e
+set -euo pipefail
 
 # Colors
 RED='\033[0;31m'
@@ -18,6 +18,7 @@ NC='\033[0m' # No Color
 REPO_URL="https://github.com/andrewchoi-hds/claude-code-config"
 REPO_RAW="https://raw.githubusercontent.com/andrewchoi-hds/claude-code-config/main"
 TEMP_DIR=$(mktemp -d)
+AUTO_YES=false
 
 # Agent definitions
 BASE_AGENTS="explorer tester e2e-tester reviewer documenter"
@@ -25,6 +26,15 @@ DOMAIN_AGENTS="frontend backend mobile devops data-ml design pm evil-user bm-mas
 
 # Dynamic counts (auto-calculated from agent lists)
 count_words() { echo $#; }
+# Count matching files safely (avoids ls parsing anti-pattern)
+count_files() {
+    local count=0
+    local f
+    for f in "$@"; do
+        [ -f "$f" ] && count=$((count + 1))
+    done
+    echo "$count"
+}
 BASE_COUNT=$(count_words $BASE_AGENTS)
 DOMAIN_COUNT=$(count_words $DOMAIN_AGENTS)
 
@@ -96,7 +106,7 @@ check_dependencies() {
 # Clone repository
 clone_repo() {
     print_info "저장소 클론 중..."
-    git clone --quiet --depth 1 "$REPO_URL" "$TEMP_DIR/repo"
+    git clone --quiet --depth 1 --single-branch "$REPO_URL" "$TEMP_DIR/repo"
     print_success "저장소 클론 완료"
 }
 
@@ -108,15 +118,26 @@ backup_config() {
     if [ -d "$claude_dir" ]; then
         local backup_dir="$claude_dir.backup.$(date +%Y%m%d_%H%M%S)"
         print_warning "기존 .claude 디렉토리 발견"
-        echo ""
-        read -p "  기존 설정을 백업하시겠습니까? (y/n): " backup_choice
+
+        local backup_choice="y"
+        if [ "$AUTO_YES" = true ]; then
+            print_info "자동 모드: 기존 설정을 백업합니다."
+        else
+            echo ""
+            read -p "  기존 설정을 백업하시겠습니까? (y/n): " backup_choice
+        fi
 
         if [[ "$backup_choice" =~ ^[Yy]$ ]]; then
             mv "$claude_dir" "$backup_dir"
             print_success "백업 완료: $backup_dir"
         else
             print_warning "기존 설정을 덮어씁니다..."
-            rm -rf "$claude_dir"
+            if [[ -n "$claude_dir" && "$claude_dir" == *"/.claude" ]]; then
+                rm -rf "$claude_dir"
+            else
+                print_error "잘못된 경로: $claude_dir"
+                exit 1
+            fi
         fi
     fi
 }
@@ -126,8 +147,8 @@ show_preset_menu() {
     echo -e "${BOLD}설치 프리셋을 선택하세요:${NC}"
     echo ""
     local cmd_total
-    cmd_total=$(ls "$TEMP_DIR/repo/.claude/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
-    if [ "$cmd_total" = "0" ] || [ -z "$cmd_total" ]; then cmd_total="?"; fi
+    cmd_total=$(count_files "$TEMP_DIR/repo/.claude/commands/"*.md)
+    if [ "$cmd_total" = "0" ]; then cmd_total="?"; fi
     print_preset "1" "Full (전체)" "모든 에이전트와 커맨드 설치" "Base(${BASE_COUNT}) + Domain(${DOMAIN_COUNT}) + Commands(${cmd_total})"
     print_preset "2" "Minimal (최소)" "기본 에이전트와 커맨드만" "Base(${BASE_COUNT}) + Commands(${cmd_total})"
     print_preset "3" "Frontend (프론트엔드)" "웹/앱 프론트엔드 개발자용" "Base + Frontend, Design, Mobile"
@@ -162,6 +183,12 @@ select_custom_agents() {
     echo ""
 
     read -p "선택 (예: 1 2 8): " choices
+
+    if [[ ! "$choices" =~ ^[0-9\ ]+$ ]]; then
+        print_error "숫자만 입력하세요."
+        echo "base"
+        return
+    fi
 
     for choice in $choices; do
         case $choice in
@@ -207,7 +234,7 @@ install_config() {
     # Copy all commands
     cp "$source_dir/commands/"*.md "$dest_dir/commands/"
     local cmd_count
-    cmd_count=$(ls "$dest_dir/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
+    cmd_count=$(count_files "$dest_dir/commands/"*.md)
     print_success "커맨드 설치됨 (${cmd_count}개)"
 
     # Copy base agents
@@ -217,7 +244,7 @@ install_config() {
         fi
     done
     local base_installed
-    base_installed=$(ls "$dest_dir/agents/base/"*.md 2>/dev/null | wc -l | tr -d ' ')
+    base_installed=$(count_files "$dest_dir/agents/base/"*.md)
     print_success "기본 에이전트 설치됨 (${base_installed}개)"
 
     # Determine which domain agents to install
@@ -236,7 +263,8 @@ install_config() {
     # Copy selected domain agents
     local domain_count=0
     for agent in $domains_to_install; do
-        agent=$(echo "$agent" | xargs) # trim whitespace
+        agent="${agent#"${agent%%[![:space:]]*}"}" # trim leading whitespace
+        agent="${agent%"${agent##*[![:space:]]}"}" # trim trailing whitespace
         if [ -f "$source_dir/agents/domain/${agent}.md" ]; then
             cp "$source_dir/agents/domain/${agent}.md" "$dest_dir/agents/domain/"
             domain_count=$((domain_count + 1))
@@ -258,6 +286,7 @@ install_config() {
 # Show installed content summary
 show_summary() {
     local preset=$1
+    local target_dir=$2
 
     echo ""
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -267,8 +296,8 @@ show_summary() {
     echo -e "${BOLD}설치된 프리셋:${NC} $preset"
     echo ""
     local installed_cmds installed_base
-    installed_cmds=$(ls "$target_dir/.claude/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
-    installed_base=$(ls "$target_dir/.claude/agents/base/"*.md 2>/dev/null | wc -l | tr -d ' ')
+    installed_cmds=$(count_files "$target_dir/.claude/commands/"*.md)
+    installed_base=$(count_files "$target_dir/.claude/agents/base/"*.md)
     echo "포함된 내용:"
     echo "  • 슬래시 커맨드 ${installed_cmds}개"
     echo "    /init, /map, /analyze, /test, /todo, /wrap"
@@ -323,6 +352,10 @@ show_help() {
     echo "  -u, --update        기존 설치를 최신 버전으로 업데이트"
     echo "                      (CLAUDE.md, state, settings 보존)"
     echo ""
+    echo "자동 모드:"
+    echo "  -y, --yes           모든 질문에 자동 응답 (비대화형 설치)"
+    echo "                      기본값: 글로벌 설치 + 전체 프리셋"
+    echo ""
     echo "기타:"
     echo "  -h, --help          이 도움말 표시"
     echo "  --list              사용 가능한 에이전트 목록"
@@ -330,6 +363,12 @@ show_help() {
     echo "예시:"
     echo "  # 대화형 설치"
     echo "  curl -sL $REPO_RAW/install.sh | bash"
+    echo ""
+    echo "  # 질문 없이 전체 설치 (원커맨드)"
+    echo "  curl -sL $REPO_RAW/install.sh | bash -s -- -y"
+    echo ""
+    echo "  # 프론트엔드 프리셋으로 질문 없이 설치"
+    echo "  curl -sL $REPO_RAW/install.sh | bash -s -- -g -p frontend -y"
     echo ""
     echo "  # 프론트엔드 프리셋으로 로컬 설치"
     echo "  curl -sL $REPO_RAW/install.sh | bash -s -- -l -p frontend"
@@ -511,6 +550,10 @@ main() {
                 install_mode="update"
                 shift
                 ;;
+            --yes|-y)
+                AUTO_YES=true
+                shift
+                ;;
             --list)
                 list_agents
                 exit 0
@@ -553,40 +596,50 @@ main() {
 
     # Interactive mode selection if not specified
     if [ -z "$install_mode" ] && [ -z "$target_dir" ]; then
-        echo "설치 위치를 선택하세요:"
-        echo ""
-        echo "  1) 글로벌 설치 (모든 프로젝트에 적용)"
-        echo "     위치: ~/.claude"
-        echo ""
-        echo "  2) 프로젝트별 설치 (현재 디렉토리)"
-        echo "     위치: $(pwd)/.claude"
-        echo ""
-        read -p "선택 (1 또는 2): " mode_choice
+        if [ "$AUTO_YES" = true ]; then
+            install_mode="global"
+            print_info "자동 모드: 글로벌 설치 (~/.claude)"
+        else
+            echo "설치 위치를 선택하세요:"
+            echo ""
+            echo "  1) 글로벌 설치 (모든 프로젝트에 적용)"
+            echo "     위치: ~/.claude"
+            echo ""
+            echo "  2) 프로젝트별 설치 (현재 디렉토리)"
+            echo "     위치: $(pwd)/.claude"
+            echo ""
+            read -p "선택 (1 또는 2): " mode_choice
 
-        case $mode_choice in
-            1) install_mode="global" ;;
-            2) install_mode="local" ;;
-            *) print_error "잘못된 선택입니다."; exit 1 ;;
-        esac
-        echo ""
+            case $mode_choice in
+                1) install_mode="global" ;;
+                2) install_mode="local" ;;
+                *) print_error "잘못된 선택입니다."; exit 1 ;;
+            esac
+            echo ""
+        fi
     fi
 
     # Interactive preset selection if not specified
     if [ -z "$preset" ]; then
-        show_preset_menu
-        read -p "선택 (1-7): " preset_choice
+        if [ "$AUTO_YES" = true ]; then
+            preset="all"
+            print_info "자동 모드: 전체 설치 (Full)"
+        else
+            show_preset_menu
+            read -p "선택 (1-7): " preset_choice
 
-        case $preset_choice in
-            1) preset="all" ;;
-            2) preset="base" ;;
-            3) preset=$(get_preset "frontend") ;;
-            4) preset=$(get_preset "backend") ;;
-            5) preset=$(get_preset "planner") ;;
-            6) preset=$(get_preset "qa") ;;
-            7) preset=$(select_custom_agents) ;;
-            *) print_error "잘못된 선택입니다."; exit 1 ;;
-        esac
-        echo ""
+            case $preset_choice in
+                1) preset="all" ;;
+                2) preset="base" ;;
+                3) preset=$(get_preset "frontend") ;;
+                4) preset=$(get_preset "backend") ;;
+                5) preset=$(get_preset "planner") ;;
+                6) preset=$(get_preset "qa") ;;
+                7) preset=$(select_custom_agents) ;;
+                *) print_error "잘못된 선택입니다."; exit 1 ;;
+            esac
+            echo ""
+        fi
     else
         # Map preset name to actual value
         case $preset in
@@ -618,7 +671,7 @@ main() {
     backup_config "$target_dir"
     install_config "$target_dir" "$preset"
 
-    show_summary "$preset"
+    show_summary "$preset" "$target_dir"
 }
 
 # Run
